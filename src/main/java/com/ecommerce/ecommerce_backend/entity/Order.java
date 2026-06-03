@@ -1,6 +1,5 @@
 package com.ecommerce.ecommerce_backend.entity;
 
-
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -36,7 +35,9 @@ public class Order {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL,
+            orphanRemoval = true, fetch = FetchType.EAGER)
+    @Builder.Default
     private List<OrderItem> orderItems = new ArrayList<>();
 
     @PrePersist
