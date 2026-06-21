@@ -25,21 +25,26 @@ public class JwtTokenProvider {
     // Generate JWT token from Authentication object
     public String generateToken(Authentication authentication) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        return buildToken(userDetails.getUsername());
+        String role = userDetails.getAuthorities().stream()
+                .findFirst()
+                .map(a -> a.getAuthority())
+                .orElse("");
+        return buildToken(userDetails.getUsername(), role);
     }
 
-    // Generate JWT token directly from email
-    public String generateTokenFromEmail(String email) {
-        return buildToken(email);
+    // Generate JWT token directly from email + role
+    public String generateTokenFromEmail(String email, String role) {
+        return buildToken(email, role);
     }
 
-    // Build the actual token
-    private String buildToken(String email) {
+    // Build the actual token — now includes role claim
+    private String buildToken(String email, String role) {
         Date now = new Date();
         Date expiry = new Date(now.getTime() + jwtExpiration);
 
         return Jwts.builder()
                 .subject(email)
+                .claim("role", role)  // ← ADD ROLE TO TOKEN
                 .issuedAt(now)
                 .expiration(expiry)
                 .signWith(getSigningKey())
@@ -82,4 +87,3 @@ public class JwtTokenProvider {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 }
-

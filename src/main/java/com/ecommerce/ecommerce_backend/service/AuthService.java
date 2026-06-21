@@ -38,14 +38,15 @@ public class AuthService {
                 .name(request.getName())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .role(User.Role.USER) // default role is USER
+                .role(User.Role.USER)
                 .build();
 
         // Save to database
         User savedUser = userRepository.save(user);
 
-        // Generate JWT token
-        String token = jwtTokenProvider.generateTokenFromEmail(savedUser.getEmail());
+        // Generate JWT token — pass role with ROLE_ prefix
+        String role = "ROLE_" + savedUser.getRole().name();
+        String token = jwtTokenProvider.generateTokenFromEmail(savedUser.getEmail(), role);
 
         // Return response
         return AuthResponse.builder()
@@ -69,7 +70,7 @@ public class AuthService {
                 )
         );
 
-        // Generate JWT token
+        // Generate JWT token from authentication object
         String token = jwtTokenProvider.generateToken(authentication);
 
         // Get user details from database
